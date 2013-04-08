@@ -8,7 +8,7 @@ class MoviesController < ApplicationController
 
   def index
     @movies = Movie.order(params[:sort])
-    instance_variable_set("@#{params[:sort]}", 1)
+    instance_variable_set("@#{params[:sort]}", 1) if !params[:sort].nil?
   end
 
   def new
