@@ -7,8 +7,33 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.order(params[:sort])
-    instance_variable_set("@#{params[:sort]}", 1) if !params[:sort].nil?
+    cnd = ""
+    if !params[:ratings].nil? then
+      @all_ratings = Movie.select("rating").map{ |e| e.rating }.uniq
+      @ratings =  params[:ratings].map{ |x| x[0] }
+      session[:ratings] = @ratings
+    else
+      @all_ratings = Movie.select("rating").map{ |e| e.rating }.uniq
+      @ratings = session[:ratings] ? session[:ratings] : @all_ratings
+    end
+   
+    @ratings.each_with_index do |e, index| 
+      if index != @ratings.size - 1
+        cnd += "rating = '#{e}' OR "
+      else
+        cnd += "rating = '#{e}'"
+      end
+    end
+
+    if !params[:sort].nil? then 
+      @movies = Movie.where(cnd).order(params[:sort])
+      instance_variable_set("@#{params[:sort]}", params[:sort])
+      @sort = params[:sort]
+    else
+      @movies = Movie.where(cnd)
+    end    
+
+    
   end
 
   def new
