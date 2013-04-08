@@ -8,7 +8,7 @@ class MoviesController < ApplicationController
 
   def index
     cnd = ""
-    if !params[:ratings].nil? then
+    if !params[:ratings].nil? and params[:ratings].length != 0 then
       @all_ratings = Movie.select("rating").map{ |e| e.rating }.uniq
       @ratings =  params[:ratings].map{ |x| x[0] }
       session[:ratings] = @ratings
@@ -29,8 +29,15 @@ class MoviesController < ApplicationController
       @movies = Movie.where(cnd).order(params[:sort])
       instance_variable_set("@#{params[:sort]}", params[:sort])
       @sort = params[:sort]
+      session[:sort] = params[:sort]
     else
-      @movies = Movie.where(cnd)
+      instance_variable_set("@#{session[:sort]}", session[:sort])
+      @sort = session[:sort] if session[:sort] 
+      if session[:sort] then
+        @movies = Movie.where(cnd).order(session[:sort])
+      else
+        @movies = Movie.where(cnd)
+      end
     end    
 
     
