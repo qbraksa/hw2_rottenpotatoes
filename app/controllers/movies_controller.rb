@@ -8,11 +8,17 @@ class MoviesController < ApplicationController
 
   def index
     cnd = ""
+    a,b = false,false
     if !params[:ratings].nil? and params[:ratings].length != 0 then
       @all_ratings = Movie.select("rating").map{ |e| e.rating }.uniq
-      @ratings =  params[:ratings].map{ |x| x[0] }
+      @ratings =  params[:ratings].map{ |k,v| k }
       session[:ratings] = @ratings
+      
+      empty = {} 
+      @ratings.each { |x| empty[x] = 1 }
+      @debug = params[:ratings]
     else
+      a = true
       @all_ratings = Movie.select("rating").map{ |e| e.rating }.uniq
       @ratings = session[:ratings] ? session[:ratings] : @all_ratings
     end
@@ -33,6 +39,7 @@ class MoviesController < ApplicationController
     else
       instance_variable_set("@#{session[:sort]}", session[:sort])
       @sort = session[:sort] if session[:sort] 
+      b = true
       if session[:sort] then
         @movies = Movie.where(cnd).order(session[:sort])
       else
@@ -40,6 +47,10 @@ class MoviesController < ApplicationController
       end
     end    
 
+    if a == true and b == true then
+      
+      redirect_to :action => "index", :ratings => @ratings, :sort => @sort and return
+    end
     
   end
 
